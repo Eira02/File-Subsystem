@@ -1,49 +1,57 @@
 #pragma once
 #include <iostream>
- 
-class String
+
+class String 
 {
-    char* data;
-    unsigned len;
-    unsigned capacity;
- 
-    void copyFrom(const String& other);
-    void free();
-    void resize();
- 
-    explicit String(unsigned capacity);
- 
 public:
     String();
-    String(const char* str);
-    String(const String& other);
-    String& operator=(const String& other);
-    ~String();
- 
-    unsigned length() const;
-    const char* c_str() const;
-    String& concat(const String& other);
- 
-    String& operator+=(const String& other);
-    String& operator+=(char ch);
- 
-    char& operator[](size_t index);
-    char operator[](size_t index) const;
+    String(const char* data);
 
-    bool endsWith(const String& suffix) const;
-    String removeNewLine();
- 
+    String(const String& other);
+    String(String&& other) noexcept;
+
+    String& operator=(const String& other); 
+
+    String& operator=(String&& other) noexcept;
+    ~String();
+
+    size_t getCapacity() const;
+    size_t getSize() const;
+
+    const char* c_str() const;
+
+    String& operator+=(const String& other);
+
+    char& operator[](size_t index);
+    const char& operator[](size_t index) const;
+
+    friend std::ostream& operator<<(std::ostream& os, const String& obj);
+    friend std::istream& operator>>(std::istream& is, String& ref);
     friend String operator+(const String& lhs, const String& rhs);
-    friend std::istream& operator>>(std::istream& is, String& str);
+
+    String substr(size_t begin, size_t howMany) const;
+
+    String& removeNewLine();
+
+private:
+    explicit String(size_t stringLength);
+    void resize(unsigned newAllocatedDataSize);
+
+    void free();
+    void copyFrom(const String& other);
+
+    void moveFrom(String&& other);
+
+    char* _data;
+    size_t _size;
+    size_t _allocatedDataSize;
 };
- 
-std::ostream& operator<<(std::ostream& os, const String& str);
- 
-bool operator<(const String& lhs, const String& rhs);
-bool operator<=(const String& lhs, const String& rhs);
-bool operator>=(const String& lhs, const String& rhs);
-bool operator>(const String& lhs, const String& rhs);
+
+
+
 bool operator==(const String& lhs, const String& rhs);
 bool operator!=(const String& lhs, const String& rhs);
- 
-unsigned getNextPowerOfTwo(unsigned n);
+bool operator<(const String& lhs, const String& rhs);
+bool operator<=(const String& lhs, const String& rhs);
+bool operator>(const String& lhs, const String& rhs);
+bool operator>=(const String& lhs, const String& rhs);

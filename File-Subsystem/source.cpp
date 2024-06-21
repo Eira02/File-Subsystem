@@ -2,6 +2,7 @@
 #include "TextFile.h"
 #include "ScriptFile.h"
 #include "LinkFile.h"
+#include "Directory.h"
 
 // -------/ To Do /-------
 // function that executes the script file and if it finds a wrong command it outputs an error
@@ -10,20 +11,22 @@
 
 int main()
 {
-    TextFile file("file.txt");
-    file.print();
+    Directory root("root", nullptr);
 
-    std::cout << file.getContents();
-    file.setContents("\nasd\nasdasd\nlkmjnh");
-    std::cout << file.getContents();
+    TextFile* file0 = new TextFile("file0.txt");
+    ScriptFile* file1 = new ScriptFile("file1.sh");
+    LinkFile* file2 = new LinkFile("file2.lnk", "");
 
-    ScriptFile file1("file.sh");
-    std::cout << "\n";
-    file1.print();
+    Directory* dir1 = new Directory("dir1", &root);
 
-    LinkFile file2("file.lnk", "path");
-    std::cout << "\n";
-    file2.print();
+    root.addFile(file0);
+    root.addFile(file1);
+    root.addFile(file2);
+    root.addFile(dir1);
 
-    return 0;
+    root.printContents();
+
+    root.removeFile("file1.sh");
+    std::cout << "\n-------------------------------------------------------";
+    root.printContents();
 }

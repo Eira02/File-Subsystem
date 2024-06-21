@@ -7,5 +7,7 @@ class LinkFile : public File
 
 public:
     LinkFile(const String& name, const String& targetPath);
+
     void print() const override;
+    const String& getName() const override;
 };

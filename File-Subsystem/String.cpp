@@ -1,208 +1,227 @@
 #include "String.h"
 #include <cstring>
-#pragma warning(disable:4996)
- 
-void String::copyFrom(const String& other)
+#include <algorithm>
+#pragma warning (disable : 4996)
+
+
+static unsigned roundToPowerOfTwo(unsigned v)
 {
-    len = other.len;
-    capacity = other.capacity;
-    data = new char[capacity + 1];
-    strcpy(data, other.data);
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v++;
+    return v;
 }
- 
-void String::free()
+
+static unsigned dataToAllocByStringLen(unsigned stringLength)
 {
-    delete[] data;
-    data = nullptr;
-    len = capacity = 0;
+    return std::max(roundToPowerOfTwo(stringLength + 1), 16u);
 }
- 
-void String::resize()
+
+String::String() : String("") {}
+
+String::String(const char* data) 
 {
-    capacity = (capacity + 1) * 2 - 1;
-    char* newData = new char[capacity + 1];
-    strcpy(newData, data);
-    delete[] data;
- 
-    data = newData;
+    _size = std::strlen(data);
+    _allocatedDataSize = dataToAllocByStringLen(_size);
+    _data = new char[_allocatedDataSize];
+    std::strcpy(_data, data);
 }
- 
-String::String(unsigned cap)
+
+String::String(size_t stringLength) 
 {
-    capacity = cap;
-    len = 0;
-    data = new char[capacity];
+    _allocatedDataSize = dataToAllocByStringLen(stringLength);
+    _data = new char[_allocatedDataSize];
+    _size = 0;
+    _data[0] = '\0';
 }
- 
-String::String() : String("")
-{
-}
- 
-String::String(const char* str)
-{
-    len = strlen(str);
-    capacity = std::max((int)getNextPowerOfTwo(len), 16) - 1;
-    data = new char[capacity + 1];
-    strcpy(data, str);
-}
- 
-String::String(const String& other)
+
+String::String(const String& other) 
 {
     copyFrom(other);
 }
- 
-String& String::operator=(const String& other)
+String::String(String&& other) noexcept
+{
+    moveFrom(std::move(other));
+}
+
+
+void String::moveFrom(String&& other)
+{
+    _data = other._data;
+    other._data = nullptr;
+    
+    _size = other._size;
+    other._size = 0;
+
+    _allocatedDataSize = other._allocatedDataSize;
+    other._allocatedDataSize = 0;
+}
+
+
+String& String::operator=(const String& other) 
 {
     if (this != &other) {
         free();
         copyFrom(other);
     }
- 
     return *this;
 }
- 
-String::~String()
+
+String& String::operator=(String&& other) noexcept
+{
+    if (this != &other)
+    {
+        free();
+        moveFrom(std::move(other));
+    }
+    return *this;
+}
+
+
+String::~String() 
 {
     free();
 }
- 
-unsigned String::length() const
+
+size_t String::getCapacity() const 
 {
-    return len;
+    return _allocatedDataSize - 1;
 }
- 
-const char* String::c_str() const
+
+size_t String::getSize() const 
 {
-    return data;
+    return _size;
 }
- 
-String& String::concat(const String& other)
+
+const char* String::c_str() const 
 {
-    if (len + other.len <= capacity) {
-        strcat(data, other.data);
-        len += other.len;
-        return *this;
-    }
-    len += other.len;
-    capacity = getNextPowerOfTwo(len) - 1;
-    char* res = new char[capacity + 1];
-    strcpy(res, data);
-    strcat(res, other.data);
- 
-    delete[] data;
-    data = res;
- 
+    return _data;
+}
+
+String& String::operator+=(const String& other) 
+{
+    if (getSize() + other.getSize() + 1 > _allocatedDataSize)
+        resize(dataToAllocByStringLen(getSize() + other.getSize()));
+
+    // we need to use strncat instead of strcat, because strcat will not work for str += str 
+    // (the terminating zero of str will be destroyed by the first char)
+    std::strncat(_data, other._data, other.getSize()); 
+    
+    _size = getSize() + other.getSize();
     return *this;
 }
- 
-String& String::operator+=(const String& other)
+
+char& String::operator[](size_t index) 
 {
-    return concat(other);
-}
- 
-String& String::operator+=(char ch)
-{
-    if (len == capacity) {
-        resize();
-    }
-    data[len++] = ch;
-    return *this;
-}
- 
-char& String::operator[](size_t index)
-{
-    return data[index];
-}
- 
-char String::operator[](size_t index) const
-{
-    return data[index];
+    return _data[index]; // no security check!!
 }
 
-bool String::endsWith(const String& suffix) const
+const char& String::operator[](size_t index) const 
 {
-    if (suffix.len > len) {
-        return false;
-    }
-    return strcmp(data + len - suffix.len, suffix.data) == 0;
+    return _data[index]; // no security check!!
 }
 
-String String::removeNewLine()
+std::ostream& operator<<(std::ostream& os, const String& obj) 
 {
-    if (len > 0 && data[len - 1] == '\n') {
-        data[--len] = '\0';
-    }
+    return os << obj._data;
+}
 
-    return *this;
-}
- 
-unsigned getNextPowerOfTwo(unsigned n)
-{
-    unsigned step = 1;
- 
-    while ((n >> step) > 0) {
-        n |= n >> step;
-        step *= 2;
-    }
- 
-    return n + 1;
-}
- 
-String operator+(const String& lhs, const String& rhs)
-{
-    unsigned len = lhs.len + rhs.len;
-    unsigned capacity = getNextPowerOfTwo(len) - 1;
- 
-    String res(capacity);
-    strcpy(res.data, lhs.data);
-    strcat(res.data, rhs.data);
-    res.len = len;
-
-    return res;
-}
- 
-std::istream& operator>>(std::istream& is, String& str)
+std::istream& operator>>(std::istream& is, String& ref)
 {
     char buff[1024];
     is >> buff;
- 
-    delete[] str.data;
-    str.len = strlen(buff);
-    str.capacity = std::max((int)getNextPowerOfTwo(str.len), 16) - 1;
-    str.data = new char[str.capacity + 1];
-    strcpy(str.data, buff);
- 
+    size_t buffStringSize = std::strlen(buff);
+
+    if (buffStringSize > ref.getCapacity())
+        ref.resize(dataToAllocByStringLen(buffStringSize));
+
+    strcpy(ref._data, buff);
+    ref._size = buffStringSize;
     return is;
 }
- 
-std::ostream& operator<<(std::ostream& os, const String& str)
+
+void String::resize(unsigned newAllocatedDataSize)
 {
-    os << str.c_str();
-    return os;
+    char* newData = new char[newAllocatedDataSize + 1];
+    std::strcpy(newData, _data);
+    delete[] _data;
+    _data = newData;
+    _allocatedDataSize = newAllocatedDataSize;
 }
- 
-bool operator<(const String& lhs, const String& rhs)
+
+void String::free() 
 {
-    return strcmp(lhs.c_str(), rhs.c_str()) < 0;
+    delete[] _data;
 }
- 
-bool operator<=(const String& lhs, const String& rhs)
+
+void String::copyFrom(const String& other) 
 {
-    return strcmp(lhs.c_str(), rhs.c_str()) <= 0;
+    _allocatedDataSize = other._allocatedDataSize;
+    _data = new char[_allocatedDataSize];
+    std::strcpy(_data, other._data);
+    _size = other._size;
 }
-bool operator>=(const String& lhs, const String& rhs)
+
+String String::substr(size_t begin, size_t howMany) const
 {
-    return strcmp(lhs.c_str(), rhs.c_str()) >= 0;
+    if (begin + howMany > getSize())
+        throw std::length_error("Error, Substr out of range");
+
+
+    String res(howMany + 1);
+    strncat(res._data, _data + begin, howMany);
+    return res;
 }
-bool operator>(const String& lhs, const String& rhs)
+
+String& String::removeNewLine()
 {
-    return strcmp(lhs.c_str(), rhs.c_str()) > 0;
+    size_t size = getSize();
+    if (size > 0 && _data[size - 1] == '\n') {
+        _data[--size] = '\0';
+    }
+
+    return *this;
 }
-bool operator==(const String& lhs, const String& rhs)
+
+
+String operator+(const String& lhs, const String& rhs) 
 {
-    return strcmp(lhs.c_str(), rhs.c_str()) == 0;
+    String result(lhs.getSize() + rhs.getSize());
+    result += lhs; // no resize is needed
+    result += rhs;
+    return result;
 }
-bool operator!=(const String& lhs, const String& rhs)
+
+bool operator==(const String& lhs, const String& rhs) 
 {
-    return strcmp(lhs.c_str(), rhs.c_str()) != 0;
+    return std::strcmp(lhs.c_str(), rhs.c_str()) == 0;
+}
+
+bool operator!=(const String& lhs, const String& rhs) 
+{
+    return std::strcmp(lhs.c_str(), rhs.c_str()) != 0;
+}
+
+bool operator<(const String& lhs, const String& rhs) 
+{
+    return std::strcmp(lhs.c_str(), rhs.c_str()) < 0;
+}
+
+bool operator<=(const String& lhs, const String& rhs) 
+{
+    return std::strcmp(lhs.c_str(), rhs.c_str()) <= 0;
+}
+
+bool operator>(const String& lhs, const String& rhs) 
+{
+    return std::strcmp(lhs.c_str(), rhs.c_str()) > 0;
+}
+
+bool operator>=(const String& lhs, const String& rhs) 
+{
+    return std::strcmp(lhs.c_str(), rhs.c_str()) >= 0;
 }

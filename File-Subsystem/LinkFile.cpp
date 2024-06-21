@@ -8,3 +8,8 @@ void LinkFile::print() const
     String secondDate = std::ctime(&modificationDate);
     std::cout << "Link File " << firstDate.removeNewLine() << " " << secondDate.removeNewLine() << " " << name;
 }
+
+const String& LinkFile::getName() const
+{
+    return name;
+}

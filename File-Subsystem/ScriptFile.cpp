@@ -9,6 +9,11 @@ void ScriptFile::print() const
     std::cout << "Script File " << firstDate.removeNewLine() << " " << secondDate.removeNewLine() << " " << name;
 }
 
+const String& ScriptFile::getName() const
+{
+    return name;
+}
+
 String ScriptFile::getContents() const
 {
     return contents;

@@ -9,6 +9,11 @@ void TextFile::print() const
     std::cout << "Text File " << firstDate.removeNewLine() << " " << secondDate.removeNewLine() << " " << name;
 }
 
+const String& TextFile::getName() const
+{
+    return name;
+}
+
 String TextFile::getContents() const
 {
     return contents;
