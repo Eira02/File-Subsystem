@@ -6,9 +6,10 @@ class ScriptFile : public File
     String contents;
 
 public:
-    ScriptFile(const String& name);
+    ScriptFile(const FileName& name);
 
     void print() const override;
+    bool isDirectory() const override;
     const String& getName() const override;
 
     String getContents() const;

@@ -11,12 +11,18 @@ class Directory : public File
     void resize();
 
 public:
-    Directory(const String& name, Directory* parent = nullptr);
+    Directory(const FileName& name, Directory* parent = nullptr);
     ~Directory();
 
-    void addFile(File* file);
-    void removeFile(const String& name);
     void print() const override;
     void printContents() const;
+    bool isDirectory() const override;
     const String& getName() const override;
+
+    bool isEmpty()const;
+    void addFile(File* file);
+    void removeFile(const String& name);
+    
+    File* getFile(const String& name) const;
+    Directory* getParent() const;
 };
