@@ -16,18 +16,23 @@ bool TextFile::isDirectory() const
     return false;
 }
 
-const String& TextFile::getName() const
+String TextFile::getName() const
 {
     return name.getName();
 }
 
+String TextFile::getExtension() const
+{
+    return name.getExtension();
+}
+
+
+void TextFile::setContents(const String& newContents)
+{
+    contents = newContents;
+}
 
 String TextFile::getContents() const
 {
     return contents;
-}
-
-void TextFile::setContents(const String& contents)
-{
-    this->contents = contents;
 }

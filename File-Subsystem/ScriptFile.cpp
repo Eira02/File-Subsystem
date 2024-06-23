@@ -16,18 +16,23 @@ bool ScriptFile::isDirectory() const
     return false;
 }
 
-const String& ScriptFile::getName() const
+String ScriptFile::getName() const
 {
     return name.getName();
 }
 
+String ScriptFile::getExtension() const
+{
+    return name.getExtension();
+}
+
+
+void ScriptFile::setContents(const String& newContents)
+{
+    contents = newContents;
+}
 
 String ScriptFile::getContents() const
 {
     return contents;
-}
-
-void ScriptFile::setContents(const String& contents)
-{
-    this->contents = contents;
 }

@@ -16,5 +16,8 @@ public:
     
     virtual void print() const = 0;
     virtual bool isDirectory() const = 0;
-    virtual const String& getName() const = 0;
+    virtual String getName() const = 0;
+    virtual String getExtension() const = 0;
+    virtual void setContents(const String& newContetns) = 0;
+    virtual String getContents() const = 0;
 };

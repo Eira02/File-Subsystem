@@ -11,7 +11,12 @@ File* FileSubsystem::navigateToFile(const String& path) const
     std::stringstream ss(path.c_str());
     Directory* current = currentDirectory;
 
-    if (path.getSize() >= 4 && strncmp(path.c_str(), "root", 4) == 0)
+    if(strcmp(path.c_str(), "root") == 0)
+    {
+        current = root;
+        return current;
+    }
+    else if (path.getSize() >= 4 && strncmp(path.c_str(), "root", 4) == 0)
     {
         current = root;
         ss.seekg(4);
@@ -89,6 +94,7 @@ void FileSubsystem::printContents(const String& path) const
     {
         std::cout << "Type        |Creation Date            |Modification Date        |Name";
         currentDirectory->printContents();
+        std::cout << std::endl;
         return;
     }
     else
@@ -99,13 +105,14 @@ void FileSubsystem::printContents(const String& path) const
         {
             std::cout << "Type        |Creation Date            |Modification Date        |Name";
             current->printContents();
+            std::cout << std::endl;
             return;
         }
         else if (current == nullptr)
             return;
     }
 
-    std::cout << "Empty directory!";
+    std::cout << "Empty directory!" << std::endl;
 }
 
 // command: pwd
@@ -129,9 +136,9 @@ void FileSubsystem::printPathToCurrentDirectory() const
     }
 
     if (path.getSize() == 0)
-        std::cout << "root" << std::endl;
+        std::cout << "root";
     else
-        std::cout <<  "root/" << path << std::endl;
+        std::cout <<  "root/" << path;
 }
 
 // command: mkdir <directory name>
@@ -189,44 +196,63 @@ void FileSubsystem::makeFile(const String& name)
         std::cout << "Error! Unsupported file extension '" << extension << "'." << std::endl;
 }
 
-//command: rm <path>
+// command: rm <path>
 void FileSubsystem::removeFile(const String& path)
 {
-    FileName fname(path);
+    int lastSlashIndex = -1;
+    for (int i = path.getSize() - 1; i >= 0; --i) {
+        if (path[i] == '/') {
+            lastSlashIndex = i;
+            break;
+        }
+    }
+
+    String fileNameOnly = path;
+    Directory* parentDir = currentDirectory;
+
+    FileName fname(fileNameOnly);
     if (fname.getExtension() == "")
     {
         std::cout << "Error! File '" << path << "' must include its extension to be removed." << std::endl;
         return;
     }
 
-    File* fileToRemove = navigateToFile(path);
+    if (lastSlashIndex != -1) {
+        String dirPath = path.substr(0, lastSlashIndex);
+        fileNameOnly = path.substr(lastSlashIndex + 1, path.getSize() - lastSlashIndex - 1);
 
-    if (fileToRemove == nullptr) 
+        parentDir = (Directory*)(navigateToFile(dirPath));
+        if (parentDir == nullptr) {
+            std::cout << "Error! Directory '" << dirPath << "' not found." << std::endl;
+            return;
+        }
+    }
+
+    File* fileToRemove = navigateToFile(fname.getName());
+
+    if (fileToRemove == nullptr)
     {
-        std::cout << "Error! File '" << path << "' not found." << std::endl;
+        std::cout << "Error! File '" << fileNameOnly << "' not found in directory '" << parentDir->getName() << "'." << std::endl;
         return;
     }
-    else if (!fileToRemove->isDirectory())
+    else if (fileToRemove->isDirectory())
     {
-
-        currentDirectory->removeFile(fileToRemove->getName());
+        std::cout << "Error! '" << fileNameOnly << "' is a directory, not a file." << std::endl;
+        return;
     }
-    else
-    {
-        std::cout << "Error! '" << path << "' is a directory, not a file." << std::endl;
-    }
+    
+    parentDir->removeFile(fileToRemove->getName());
 }
 
-//command: rmdir <path>
+// command: rmdir <path>
 void FileSubsystem::removeDirectory(const String& path)
 {
-    FileName fname(path);
-    if (fname.getExtension() != "")
-    {
-        std::cout << "Error! '" << path << "' is not a directory." << std::endl;
-        return;
-    }
-
+    //FileName fname(path);
+    //if (fname.getExtension() != "")
+    //{
+    //    std::cout << "Error! '" << path << "' is not a directory." << std::endl;
+    //    return;
+    //}
 
     File* fileToRemove = navigateToFile(path);
 
@@ -241,7 +267,7 @@ void FileSubsystem::removeDirectory(const String& path)
         return;
     }
 
-    Directory* dirToRemove = static_cast<Directory*>(fileToRemove);
+    Directory* dirToRemove = (Directory*)(fileToRemove);
 
     if (!dirToRemove->isEmpty())
     {
@@ -251,6 +277,90 @@ void FileSubsystem::removeDirectory(const String& path)
 
     Directory* parentDir = dirToRemove->getParent();
 
-    if (parentDir != nullptr) 
+    if (parentDir != nullptr && currentDirectory != dirToRemove) 
         parentDir->removeFile(dirToRemove->getName());
+    else 
+    {
+        currentDirectory = parentDir;
+        parentDir->removeFile(dirToRemove->getName());
+    }
 }
+
+// command: exec <file path>
+void FileSubsystem::executeFile(const String& path)
+{
+    int lastSlashIndex = -1;
+    for (int i = path.getSize() - 1; i >= 0; --i) {
+        if (path[i] == '/') {
+            lastSlashIndex = i;
+            break;
+        }
+    }
+
+    String fileNameOnly = path;
+
+    FileName fname(fileNameOnly);
+    if (fname.getExtension() == "")
+    {
+        std::cout << "Error! File '" << path << "' must include its extension to be executed." << std::endl;
+        return;
+    }
+
+    File* fileToExecute = navigateToFile(path);
+
+    if (fileToExecute == nullptr)
+    {
+        std::cout << "Error! File '" << fileNameOnly << "' not found." << std::endl;
+        return;
+    }
+    else if (fileToExecute->isDirectory())
+    {
+        std::cout << "Error! '" << fileNameOnly << "' is a directory, not a file." << std::endl;
+        return;
+    }
+    else if (fileToExecute->getExtension() == ".txt")
+    {
+        std::cout << fileToExecute->getContents() << std::endl;
+    } 
+    else if (fileToExecute->getExtension() == ".sh")
+    {
+        // execute the script file
+    } 
+    else if (fileToExecute->getExtension() == ".lnk")
+    {
+        executeFile(fileToExecute->getContents());
+    } 
+    else {
+        std::cout << "Error! Unsupported file type for '" << path << "'." << std::endl;
+    }
+}
+
+// command: echo
+ void FileSubsystem::echo(const String& str) const
+ {
+    std::cout << str << std::endl;
+ }
+
+// command: echo <text> > <file> and <text> >> <file>
+void FileSubsystem::echoToFile(const String& str, const String& fileName, bool append)
+{
+    //trqbva i da promenq modification date
+    FileName fname(fileName);
+    File* file = currentDirectory->getFile(fname.getName());
+    
+    if (file->isDirectory())
+    {
+        std::cout << "Error! Cannot echo to a directory." << std::endl;
+    }
+
+    if(append)
+    {
+        // should i add newline between the old and new contents
+        file->setContents(file->getContents() + str);
+    }
+    else
+    {
+        file->setContents(str);
+    }
+}
+

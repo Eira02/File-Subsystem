@@ -10,8 +10,8 @@ public:
 
     void print() const override;
     bool isDirectory() const override;
-    const String& getName() const override;
-
-    String getContents() const;
-    void setContents(const String& contents);
+    String getName() const override;
+    String getExtension() const override;
+    void setContents(const String& contents) override;
+    String getContents() const override;
 };

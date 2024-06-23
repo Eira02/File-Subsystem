@@ -17,7 +17,10 @@ public:
     void print() const override;
     void printContents() const;
     bool isDirectory() const override;
-    const String& getName() const override;
+    String getName() const override;
+    String getExtension() const override;
+    void setContents(const String& newContents) override;
+    String getContents() const override;
 
     bool isEmpty()const;
     void addFile(File* file);

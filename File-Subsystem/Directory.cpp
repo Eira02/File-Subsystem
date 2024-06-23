@@ -47,9 +47,24 @@ bool Directory::isDirectory() const
     return true;
 }
 
-const String& Directory::getName() const
+String Directory::getName() const
 {
     return name.getName();
+}
+
+String Directory::getExtension() const
+{
+    return name.getExtension();
+}
+
+// ??
+void Directory::setContents(const String& newContents)
+{
+    std::cout << "Error! Cannot echo to a directory." << std::endl;
+}
+String Directory::getContents() const
+{
+    return nullptr;
 }
 
 

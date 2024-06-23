@@ -16,7 +16,23 @@ bool LinkFile::isDirectory() const
     return false;
 }
 
-const String& LinkFile::getName() const
+String LinkFile::getName() const
 {
     return name.getName();
+}
+
+String LinkFile::getExtension() const
+{
+    return name.getExtension();
+}
+
+
+void LinkFile::setContents(const String& newContents)
+{
+    path = newContents;
+}
+    
+String LinkFile::getContents() const
+{
+    return path;
 }
