@@ -17,4 +17,6 @@ public:
     void printPathToCurrentDirectory() const;
     void makeDirectory(const String& name);
     void makeFile(const String& name);
+    void removeFile(const String& path);
+    void removeDirectory(const String& path);
 };

@@ -68,9 +68,10 @@ void Directory::addFile(File* file)
 
 void Directory::removeFile(const String& name)
 {
+    FileName fname(name);
     for (size_t i = 0; i < size; ++i)
     {
-        if (contents[i]->getName() == name)
+        if (contents[i]->getName() == fname.getName())
         {
             delete contents[i];
             for (size_t j = i; j < size - 1; ++j)
@@ -88,9 +89,10 @@ void Directory::removeFile(const String& name)
 
 File* Directory::getFile(const String& name) const
 {
+    FileName fname(name);
     for (size_t i = 0; i < size; ++i)
     {
-        if (contents[i]->getName() == name)
+        if (contents[i]->getName() == fname.getName())
             return contents[i];
     }
 

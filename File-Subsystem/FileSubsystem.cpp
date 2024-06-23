@@ -188,3 +188,69 @@ void FileSubsystem::makeFile(const String& name)
     else 
         std::cout << "Error! Unsupported file extension '" << extension << "'." << std::endl;
 }
+
+//command: rm <path>
+void FileSubsystem::removeFile(const String& path)
+{
+    FileName fname(path);
+    if (fname.getExtension() == "")
+    {
+        std::cout << "Error! File '" << path << "' must include its extension to be removed." << std::endl;
+        return;
+    }
+
+    File* fileToRemove = navigateToFile(path);
+
+    if (fileToRemove == nullptr) 
+    {
+        std::cout << "Error! File '" << path << "' not found." << std::endl;
+        return;
+    }
+    else if (!fileToRemove->isDirectory())
+    {
+
+        currentDirectory->removeFile(fileToRemove->getName());
+    }
+    else
+    {
+        std::cout << "Error! '" << path << "' is a directory, not a file." << std::endl;
+    }
+}
+
+//command: rmdir <path>
+void FileSubsystem::removeDirectory(const String& path)
+{
+    FileName fname(path);
+    if (fname.getExtension() != "")
+    {
+        std::cout << "Error! '" << path << "' is not a directory." << std::endl;
+        return;
+    }
+
+
+    File* fileToRemove = navigateToFile(path);
+
+    if (fileToRemove == nullptr || !fileToRemove->isDirectory()) 
+    {
+        std::cout << "Error! Directory '" << path << "' not found." << std::endl;
+        return;
+    }
+    else if (fileToRemove == root)
+    {
+        std::cout << "Error! Cannot remove 'root' directory." << std::endl;
+        return;
+    }
+
+    Directory* dirToRemove = static_cast<Directory*>(fileToRemove);
+
+    if (!dirToRemove->isEmpty())
+    {
+        std::cout << "Error! Directory '" << path << "' must be empty to be removed." << std::endl;
+        return;
+    }
+
+    Directory* parentDir = dirToRemove->getParent();
+
+    if (parentDir != nullptr) 
+        parentDir->removeFile(dirToRemove->getName());
+}
