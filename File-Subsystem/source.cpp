@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Terminal.h"
+#include <fstream>
 
 int main()
 {

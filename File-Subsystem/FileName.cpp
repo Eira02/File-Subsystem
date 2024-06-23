@@ -38,3 +38,16 @@ void FileName::setExtension(const String& extension)
 {
 	this->extension = extension;
 }
+
+
+void FileName::saveToBinaryFile(std::ofstream& ofs) const
+{
+	name.saveToBinaryFile(ofs);
+	extension.saveToBinaryFile(ofs);
+}
+
+void FileName::readFromBinaryFile(std::ifstream& ifs)
+{
+	name.readFromBinaryFile(ifs);
+    extension.readFromBinaryFile(ifs);
+}

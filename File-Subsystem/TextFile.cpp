@@ -16,16 +16,6 @@ bool TextFile::isDirectory() const
     return false;
 }
 
-String TextFile::getName() const
-{
-    return name.getName();
-}
-
-String TextFile::getExtension() const
-{
-    return name.getExtension();
-}
-
 
 void TextFile::setContents(const String& newContents)
 {
@@ -35,4 +25,17 @@ void TextFile::setContents(const String& newContents)
 String TextFile::getContents() const
 {
     return contents;
+}
+
+
+void TextFile::saveToBinaryFile(std::ofstream& ofs) const
+{
+    File::saveToBinaryFile(ofs);
+    contents.saveToBinaryFile(ofs);
+}
+
+void TextFile::readFromBinaryFile(std::ifstream& ifs)
+{
+    File::readFromBinaryFile(ifs);
+    contents.readFromBinaryFile(ifs);
 }

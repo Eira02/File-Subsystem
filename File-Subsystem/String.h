@@ -33,6 +33,9 @@ public:
 
     String& removeNewLine();
 
+    void saveToBinaryFile(std::ofstream& ofs) const;
+    void readFromBinaryFile(std::ifstream& ifs);
+
 private:
     explicit String(size_t stringLength);
     void resize(unsigned newAllocatedDataSize);

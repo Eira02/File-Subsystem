@@ -47,16 +47,6 @@ bool Directory::isDirectory() const
     return true;
 }
 
-String Directory::getName() const
-{
-    return name.getName();
-}
-
-String Directory::getExtension() const
-{
-    return name.getExtension();
-}
-
 // ??
 void Directory::setContents(const String& newContents)
 {
@@ -117,4 +107,19 @@ File* Directory::getFile(const String& name) const
 Directory* Directory::getParent() const
 {
     return parent;
+}
+
+
+void Directory::saveToBinaryFile(std::ofstream& ofs) const
+{
+    File::saveToBinaryFile(ofs);
+
+    // write Directory
+}
+
+void Directory::readFromBinaryFile(std::ifstream& ifs)
+{
+    File::readFromBinaryFile(ifs);
+
+    // read Directory
 }

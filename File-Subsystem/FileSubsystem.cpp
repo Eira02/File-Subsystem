@@ -177,14 +177,14 @@ void FileSubsystem::makeFile(const String& name)
     
     if (existingFile != nullptr)
     {
-        //update the modification date
+        existingFile->updateModificationDate();
         return;
     }
 
     if (extension == ".sh") 
         currentDirectory->addFile(new ScriptFile(fname));
     else if (extension == ".lnk") 
-        currentDirectory->addFile(new LinkFile(fname, ""));
+        currentDirectory->addFile(new LinkFile(fname));
     else if (extension == ".txt") 
         currentDirectory->addFile(new TextFile(fname));
     else if (extension == "")
@@ -344,7 +344,6 @@ void FileSubsystem::executeFile(const String& path)
 // command: echo <text> > <file> and <text> >> <file>
 void FileSubsystem::echoToFile(const String& str, const String& fileName, bool append)
 {
-    //trqbva i da promenq modification date
     FileName fname(fileName);
     File* file = currentDirectory->getFile(fname.getName());
     
@@ -356,11 +355,12 @@ void FileSubsystem::echoToFile(const String& str, const String& fileName, bool a
     if(append)
     {
         // should i add newline between the old and new contents
+        file->updateModificationDate();
         file->setContents(file->getContents() + str);
     }
     else
     {
+        file->updateModificationDate();
         file->setContents(str);
     }
 }
-

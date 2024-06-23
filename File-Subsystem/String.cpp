@@ -1,5 +1,6 @@
 #include "String.h"
 #include <cstring>
+#include <fstream>
 #include <algorithm>
 #pragma warning (disable : 4996)
 
@@ -185,6 +186,26 @@ String& String::removeNewLine()
     }
 
     return *this;
+}
+
+void String::saveToBinaryFile(std::ofstream& ofs) const
+{
+    ofs.write((const char*)&_size, sizeof(size_t));
+    ofs.write(_data, _size);
+}
+
+void String::readFromBinaryFile(std::ifstream& ifs)
+{
+    size_t size;
+    ifs.read((char*)&size, sizeof(size_t));
+
+    free();
+    _size = size;
+    _allocatedDataSize = size;
+    _data = new char[_allocatedDataSize + 1];
+
+    ifs.read(_data, _size);
+    _data[_size] = '\0';
 }
 
 

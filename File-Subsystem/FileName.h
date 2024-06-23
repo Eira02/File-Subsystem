@@ -12,4 +12,7 @@ public:
 	const String& getExtension() const;
 
 	void setExtension(const String& extension);
+
+	void saveToBinaryFile(std::ofstream& ofs) const;
+    void readFromBinaryFile(std::ifstream& ifs);
 };

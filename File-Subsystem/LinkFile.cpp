@@ -1,6 +1,6 @@
 #include "LinkFile.h"
 
-LinkFile::LinkFile(const FileName& name, const String& path) : File(name), path(path) {}
+LinkFile::LinkFile(const FileName& name) : File(name) {}
 
 
 void LinkFile::print() const
@@ -16,16 +16,6 @@ bool LinkFile::isDirectory() const
     return false;
 }
 
-String LinkFile::getName() const
-{
-    return name.getName();
-}
-
-String LinkFile::getExtension() const
-{
-    return name.getExtension();
-}
-
 
 void LinkFile::setContents(const String& newContents)
 {
@@ -35,4 +25,17 @@ void LinkFile::setContents(const String& newContents)
 String LinkFile::getContents() const
 {
     return path;
+}
+
+
+void LinkFile::saveToBinaryFile(std::ofstream& ofs) const
+{
+    File::saveToBinaryFile(ofs);
+    path.saveToBinaryFile(ofs);
+}
+
+void LinkFile::readFromBinaryFile(std::ifstream& ifs)
+{
+    File::readFromBinaryFile(ifs);
+    path.readFromBinaryFile(ifs);
 }

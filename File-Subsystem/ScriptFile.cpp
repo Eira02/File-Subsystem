@@ -16,16 +16,6 @@ bool ScriptFile::isDirectory() const
     return false;
 }
 
-String ScriptFile::getName() const
-{
-    return name.getName();
-}
-
-String ScriptFile::getExtension() const
-{
-    return name.getExtension();
-}
-
 
 void ScriptFile::setContents(const String& newContents)
 {
@@ -35,4 +25,17 @@ void ScriptFile::setContents(const String& newContents)
 String ScriptFile::getContents() const
 {
     return contents;
+}
+
+
+void ScriptFile::saveToBinaryFile(std::ofstream& ofs) const
+{
+    File::saveToBinaryFile(ofs);
+    contents.saveToBinaryFile(ofs);
+}
+
+void ScriptFile::readFromBinaryFile(std::ifstream& ifs)
+{
+    File::readFromBinaryFile(ifs);
+    contents.readFromBinaryFile(ifs);
 }
